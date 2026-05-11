@@ -1,0 +1,55 @@
+// Prisma schema file,
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model User {
+  id            String        @id @default(uuid())
+  name          String
+  email         String        @unique
+  password_hash String
+  created_at    DateTime      @default(now())
+  categories    Category[]
+  transactions  Transaction[]
+  budgets       Budget[]
+}
+
+model Category {
+  id           String        @id @default(uuid())
+  user_id      String
+  name         String
+  type         String        // "Income" or "Expense"
+  user         User          @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  transactions Transaction[]
+  budgets      Budget[]
+}
+
+model Transaction {
+  id          String   @id @default(uuid())
+  user_id     String
+  category_id String
+  title       String
+  amount      Float
+  type        String   // "Income" or "Expense"
+  date        DateTime
+  note        String?
+  created_at  DateTime @default(now())
+  user        User     @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  category    Category @relation(fields: [category_id], references: [id], onDelete: Restrict)
+}
+
+model Budget {
+  id          String   @id @default(uuid())
+  user_id     String
+  category_id String
+  amount      Float
+  period      String   // e.g., "Monthly"
+  created_at  DateTime @default(now())
+  user        User     @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  category    Category @relation(fields: [category_id], references: [id], onDelete: Restrict)
+}
